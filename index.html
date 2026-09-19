@@ -4,81 +4,526 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <meta name="theme-color" content="#f3e9d9" />
-<title>رسالة</title>
+<title>رسالة لأخ رامز</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --env: #fdfaf2;
+    --env-light: #fffdf7;
+    --env-shade: #e8e0cd;
+    --strip: #d8c9a6;
+    --strip-dark: #b7a27a;
+    --ink: #4a3628;
+    --ink-soft: #7d6a52;
+    --coffee: #6b4a32;
+    --coffee-2: #835f3f;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  [hidden] { display: none !important; }
 
   body {
     min-height: 100dvh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
     font-family: "Segoe UI", "Cairo", Tahoma, sans-serif;
     background: linear-gradient(160deg, #fbf5ea 0%, #f2e8d8 58%, #e8ddcc 100%) fixed;
-    color: #4a3628;
-    text-align: center;
+    color: var(--ink);
+    overflow-x: hidden;
+    overscroll-behavior-y: none;
+    user-select: none;
   }
 
-  .coming {
-    max-width: 460px;
+  .stage {
+    position: relative;
+    z-index: 2;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 34px 20px 44px;
+  }
+
+  .env-cover {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     width: 100%;
-    background: linear-gradient(180deg, #fffdf6, #f7efdf);
-    border: 1px solid rgba(150, 110, 70, .18);
-    border-radius: 22px;
-    padding: 48px 30px 42px;
-    box-shadow: 0 22px 55px rgba(96, 66, 40, .22);
+    margin: auto;
+    transition: opacity .6s ease, transform .7s cubic-bezier(.4, 0, .2, 1);
+  }
+  .stage.hidden .env-cover {
+    opacity: 0;
+    transform: translateY(-64px) scale(.94);
   }
 
-  .timer {
-    width: 84px;
-    height: 84px;
-    margin: 0 auto 28px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #835f3f, #6b4a32);
-    color: #fdf6e9;
+  .env {
+    width: min(88vw, 350px);
+    aspect-ratio: 300 / 188;
+    position: relative;
+    border-radius: 12px;
+    background: linear-gradient(160deg, var(--env-light), var(--env));
+    box-shadow: 0 26px 60px rgba(96, 66, 40, .25);
+    border: 1px solid rgba(150, 110, 70, .14);
+    cursor: pointer;
+    perspective: 900px;
+    transition: transform .12s ease;
+    touch-action: manipulation;
+  }
+
+  .env.ready:hover { transform: translateY(-4px); }
+  .env.press { transform: scale(.975); }
+  .env.torn { cursor: default; }
+
+  .env.shake { animation: envShake .38s ease; }
+  @keyframes envShake {
+    0%, 100% { transform: translateX(0) rotate(0); }
+    20% { transform: translateX(-3px) rotate(-.4deg); }
+    40% { transform: translateX(3px) rotate(.4deg); }
+    60% { transform: translateX(-2px) rotate(-.2deg); }
+    80% { transform: translateX(2px) rotate(.2deg); }
+  }
+
+  .env-lid {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 34%;
+    z-index: 2;
+    transform-origin: top center;
+    background: linear-gradient(180deg, #fffdf6, #ebe3cf);
+    border-radius: 12px 12px 0 0;
+    box-shadow: 0 4px 12px rgba(96, 66, 40, .12);
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 93.75% 44%, 87.5% 100%, 81.25% 44%, 75% 100%, 68.75% 44%, 62.5% 100%, 56.25% 44%, 50% 100%, 43.75% 44%, 37.5% 100%, 31.25% 44%, 25% 100%, 18.75% 44%, 12.5% 100%, 6.25% 44%, 0 100%);
+    transform: rotateX(0deg);
+    opacity: 0;
+    transition: transform .55s cubic-bezier(.34, 1.3, .5, 1);
+  }
+  .env.torn .env-lid {
+    animation: lidFlash .3s ease forwards;
+    transform: rotateX(-150deg);
+  }
+  @keyframes lidFlash {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+
+  .env-face {
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    z-index: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    padding-bottom: 9%;
+  }
+  .env-face::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(135deg, transparent 49.4%, rgba(150, 120, 80, .22) 50%, transparent 50.6%) 0 0 / 58% 100% no-repeat,
+      linear-gradient(45deg, transparent 49.4%, rgba(150, 120, 80, .22) 50%, transparent 50.6%) 100% 0 / 58% 100% no-repeat;
+  }
+  .env-face::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(255, 255, 255, .4), rgba(160, 130, 90, .06) 55%, transparent 70%);
+  }
+
+  .thanks {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(1.5rem, 7vw, 2rem);
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: .03em;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, .45);
+    position: relative;
+    z-index: 1;
+  }
+  .to {
+    margin-top: 7px;
+    font-size: clamp(.78rem, 3.4vw, .98rem);
+    font-weight: 700;
+    color: var(--ink-soft);
+    letter-spacing: .08em;
+    position: relative;
+    z-index: 1;
+  }
+
+  .strip {
+    position: absolute;
+    top: 34%;
+    left: 2%;
+    right: 2%;
+    height: 42px;
+    z-index: 5;
+    background:
+      repeating-linear-gradient(45deg, rgba(255, 255, 255, .14) 0 6px, transparent 6px 12px),
+      linear-gradient(180deg, var(--strip), var(--strip-dark));
+    border-radius: 6px;
+    box-shadow: 0 3px 8px rgba(96, 66, 40, .2);
+    opacity: 0;
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 93.75% 46%, 87.5% 100%, 81.25% 46%, 75% 100%, 68.75% 46%, 62.5% 100%, 56.25% 46%, 50% 100%, 43.75% 46%, 37.5% 100%, 31.25% 46%, 25% 100%, 18.75% 46%, 12.5% 100%, 6.25% 46%, 0 100%);
+  }
+  .env.torn .strip {
+    animation: stripTear .55s cubic-bezier(.4, 0, 1, .7) forwards;
+  }
+  @keyframes stripTear {
+    0% { opacity: 0; transform: translateY(0) rotate(0); }
+    16% { opacity: 1; transform: translateY(-8%) rotate(1.5deg); }
+    100% { opacity: 0; transform: translateY(-170%) rotate(8deg); }
+  }
+
+  .hint {
+    margin-top: 26px;
+    font-size: clamp(.92rem, 4vw, 1.05rem);
+    color: var(--ink-soft);
+    background: rgba(255, 255, 255, .5);
+    border: 1px solid rgba(150, 110, 70, .16);
+    padding: 9px 20px;
+    border-radius: 40px;
+    pointer-events: none;
+    transition: opacity .5s ease, transform .5s ease;
+  }
+  .stage.hidden .hint { opacity: 0; transform: translateY(24px); }
+
+  .letter-card {
+    width: min(94vw, 520px);
+    background:
+      linear-gradient(rgba(150, 110, 70, .045) 1px, transparent 1px) 0 0 / 100% 30px,
+      linear-gradient(180deg, #fffdf6, #f7efdf);
+    border: 1px solid rgba(150, 110, 70, .18);
+    border-radius: 18px;
+    padding: 26px 22px 30px;
+    box-shadow: 0 22px 55px rgba(96, 66, 40, .22);
+    display: none;
+  }
+  .stage.hidden .letter-card { display: block; animation: cardIn .85s cubic-bezier(.22, 1.1, .35, 1) both; }
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(120px) scale(.92); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .letter-card > * { animation: riseFade .65s cubic-bezier(.3, 1.3, .42, 1) both; }
+  .letter-card .photo-frame { animation: photoRise .65s cubic-bezier(.3, 1.3, .42, 1) both; }
+  .letter-card .letter-text { animation-delay: .26s; }
+  .letter-card .signature { animation-delay: .38s; }
+  .letter-card .audio-card { animation-delay: .5s; }
+  @keyframes riseFade {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes photoRise {
+    from { opacity: 0; transform: translateY(16px) rotate(-1.6deg); }
+    to { opacity: 1; transform: translateY(0) rotate(-1.6deg); }
+  }
+
+  .photo-frame {
+    width: 58%;
+    max-width: 220px;
+    aspect-ratio: 1 / 1.15;
+    margin: 0 auto 22px;
+    border-radius: 16px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 12px 28px rgba(96, 66, 40, .3);
+    border: 4px solid #fdf9ef;
+    outline: 1px solid rgba(150, 110, 70, .28);
+    transform: rotate(-1.6deg);
+    background: linear-gradient(135deg, #ead6b4, #dcc194);
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+  .carousel { position: absolute; inset: 0; }
+  .slide {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity .55s ease;
+  }
+  .slide.on { opacity: 1; }
+  .slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .photo-ph {
+    width: 100%;
+    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 12px 26px rgba(90, 62, 35, .35);
-    animation: pulse 2s ease-in-out infinite;
   }
-  .timer svg { width: 44px; height: 44px; }
-
-  @keyframes pulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.06); }
+  .photo-ph.heart::before {
+    content: "♥";
+    font-size: 2.8rem;
+    color: #a97f58;
   }
 
-  .line {
-    font-size: 1.25rem;
-    font-weight: 800;
-    line-height: 1.9;
+  .dots {
+    position: absolute;
+    left: 0; right: 0;
+    bottom: 8px;
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    z-index: 3;
+    padding: 2px;
+  }
+  .dots button {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    border: none;
+    padding: 0;
+    background: rgba(255, 255, 255, .55);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .25);
+    cursor: pointer;
+    transition: background .3s ease, transform .3s ease;
+  }
+  .dots button.on { background: #fff; transform: scale(1.35); }
+
+  .ph-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 3;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, .8);
+    color: var(--ink);
+    font-size: 1.1rem;
+    line-height: 1;
+    cursor: pointer;
+    box-shadow: 0 3px 8px rgba(60, 40, 20, .3);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    touch-action: manipulation;
+  }
+  .ph-nav.show { display: flex; }
+  .ph-nav.prev { inset-inline-start: 6px; }
+  .ph-nav.next { inset-inline-end: 6px; }
+
+  .letter-text {
+    font-size: clamp(.98rem, 4.2vw, 1.12rem);
+    line-height: 2.1;
+    white-space: pre-line;
+    text-align: right;
+    color: var(--ink);
   }
 
-  .emoji {
-    margin-top: 22px;
-    font-size: 2rem;
-    letter-spacing: .5em;
-    text-indent: .5em;
+  .signature {
+    display: block;
+    margin: 18px auto 0;
+    max-width: 190px;
+    max-height: 76px;
+    width: auto;
+    height: auto;
   }
+
+  .audio-card {
+    margin-top: 26px;
+    background: linear-gradient(180deg, #fffdf7, #f6eddc);
+    border: 1px solid rgba(150, 110, 70, .22);
+    border-radius: 16px;
+    padding: 14px 16px;
+  }
+  .voice-row {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+  }
+  .voice-btn {
+    flex: 0 0 auto;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    border: none;
+    background: linear-gradient(135deg, var(--coffee-2), var(--coffee));
+    color: #fdf6e9;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 18px rgba(90, 62, 35, .32);
+    transition: transform .2s ease, box-shadow .25s ease, filter .2s ease;
+    touch-action: manipulation;
+  }
+  .voice-btn:hover { transform: translateY(-2px); box-shadow: 0 11px 22px rgba(90,62,35,.4); filter: brightness(1.07); }
+  .voice-btn:active { transform: scale(.95); }
+  .voice-btn svg {
+    width: 22px;
+    height: 22px;
+    fill: currentColor;
+    display: block;
+  }
+  .voice-info {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .voice-eq {
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    height: 16px;
+  }
+  .voice-eq span {
+    width: 3px;
+    border-radius: 3px;
+    background: var(--coffee);
+    height: 100%;
+    transform-origin: bottom;
+    opacity: .25;
+  }
+  .js-playing .voice-eq span { opacity: 1; animation: eqBar .9s ease-in-out infinite; }
+  .js-playing .voice-eq span:nth-child(1) { animation-delay: 0s; }
+  .js-playing .voice-eq span:nth-child(2) { animation-delay: .18s; }
+  .js-playing .voice-eq span:nth-child(3) { animation-delay: .36s; }
+  .js-playing .voice-eq span:nth-child(4) { animation-delay: .54s; }
+  @keyframes eqBar {
+    0%, 100% { transform: scaleY(.3); }
+    50% { transform: scaleY(1); }
+  }
+  .voice-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 5px;
+    font-size: .95rem;
+    min-height: 1.2em;
+  }
+  .voice-status { color: var(--ink-soft); font-weight: 600; }
+  .js-playing .voice-status { display: none; }
+  .voice-time {
+    font-weight: 700;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .audio-note {
+    margin-top: 10px;
+    font-size: .82rem;
+    color: var(--ink-soft);
+    display: none;
+  }
+
+  .modal {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    background: rgba(24, 16, 10, .85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .25s ease;
+  }
+  .modal.open { opacity: 1; pointer-events: auto; }
+  .modal img {
+    max-width: 92vw;
+    max-height: 82vh;
+    border-radius: 10px;
+    box-shadow: 0 18px 60px rgba(0, 0, 0, .5);
+    object-fit: contain;
+  }
+  .modal button {
+    position: absolute;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, .16);
+    color: #fff;
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .2s ease;
+    touch-action: manipulation;
+  }
+  .modal button:hover { background: rgba(255, 255, 255, .3); }
+  .modal-close {
+    top: 18px;
+    inset-inline-end: 18px;
+  }
+  .modal-nav.prev { top: 50%; transform: translateY(-50%); inset-inline-start: 12px; font-size: 2rem; }
+  .modal-nav.next { top: 50%; transform: translateY(-50%); inset-inline-end: 60px; font-size: 2rem; }
+  .modal-nav.hide { display: none; }
+
+  audio { display: none; }
 
   @media (prefers-reduced-motion: reduce) {
-    .timer { animation: none; }
+    .letter-card,
+    .letter-card > * { animation-duration: .01s !important; animation-delay: 0s !important; transition: none !important; transform: none !important; }
+    .env-cover { transition: none !important; transform: none !important; }
   }
 </style>
 </head>
 <body>
-  <div class="coming">
-    <div class="timer" aria-hidden="true">
-      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <circle cx="12" cy="13" r="8.2" stroke="currentColor" stroke-width="2"/>
-        <path d="M12 9v4.2l2.8 1.6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-        <path d="M9 2.5h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-      </svg>
+
+  <div class="stage" id="stage">
+    <div class="env-cover" id="cover">
+      <div class="env" id="env">
+        <div class="env-face">
+          <span class="thanks">!THANK YOU</span>
+          <span class="to">To: A5 Ramez Eskander</span>
+        </div>
+        <div class="strip"></div>
+        <div class="env-lid"></div>
+      </div>
+      <p class="hint">دوس على الظرف عشان تفتحه</p>
     </div>
-    <p class="line">استناني يا اخ رامز بس<br>اروح و ارفع صورة القعدة و هبعت لحضرتك</p>
-    <p class="emoji">😂😂</p>
+
+    <div class="letter-card" id="card">
+      <div class="photo-frame" id="photoFrame">
+        <div class="carousel" id="carousel"></div>
+        <div class="dots" id="dots"></div>
+        <button class="ph-nav prev" id="prevPhoto" aria-label="السابق">›</button>
+        <button class="ph-nav next" id="nextPhoto" aria-label="التالي">‹</button>
+      </div>
+      <p class="letter-text" id="letterText">أهلاً بأحلى و أغلى أخ رامز في الكووون
+الموقع دة مخصوص ليك عشان حضرتك غالي عليا جداً .. أنا بشكرك حضرتك من كل قلبي و مهما قولت و شكرت فعلاً مش هيكفي
+ربنا يخلي حضرتك لينا و دائماً بنتعلم من حضرتك و بنتتلمذ على ايديك و دامت محبة حضرتك الجميلة و الغالية يا أحلى أخ رامز
+زي ما قولت فعلاً مش هقدر اوصف كم امتناني و محبتي و غلاوة حضرتك عندي لكن حاولت اعبر عن جزء منها في الفويس مسدج اللي تحت دي
+مع كامل حبي و امتناني و تقديري،</p>
+      <img class="signature" id="signature" src="photo/signature.png" alt="التوقيع" />
+      <div class="audio-card">
+        <div class="voice-row">
+          <button class="voice-btn" id="playBtn" aria-label="تشغيل الفويس">
+            <svg id="icoPlay" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+            <svg id="icoPause" viewBox="0 0 24 24" aria-hidden="true" hidden><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+            <svg id="icoReplay" viewBox="0 0 24 24" aria-hidden="true" hidden><path d="M12 5V2L6.5 7.5 12 13V9.9c3.2 0 5.8 2.6 5.8 5.8s-2.6 5.8-5.8 5.8-5.8-2.6-5.8-5.8H4A8 8 0 1 0 12 5z"/></svg>
+          </button>
+          <div class="voice-info">
+            <div class="voice-eq" id="eq"><span></span><span></span><span></span><span></span></div>
+            <div class="voice-meta">
+              <span class="voice-status" id="voiceStatus">تشغيل</span>
+              <span class="voice-time" id="voiceTime">0:00</span>
+            </div>
+          </div>
+        </div>
+        <audio id="voice" src="audio/voice-note.mp4" preload="auto"></audio>
+        <div class="audio-note" id="audioNote">مش لاقي ملف الصوت — اتأكد إن الفويس نوت في مجلد audio</div>
+      </div>
+    </div>
   </div>
+
+  <div class="modal" id="photoModal" role="dialog" aria-modal="true">
+    <button class="modal-close" id="modalClose" aria-label="إغلاق">×</button>
+    <button class="modal-nav prev hide" id="modalPrev" aria-label="السابق">›</button>
+    <img id="modalImg" alt="صورة" />
+    <button class="modal-nav next hide" id="modalNext" aria-label="التالي">‹</button>
+  </div>
+
+<script src="app.js"></script>
 </body>
 </html>
