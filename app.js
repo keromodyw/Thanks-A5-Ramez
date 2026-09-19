@@ -15,6 +15,35 @@
   var row = document.querySelector('.voice-row');
 
   var PHOTOS = ['photo/photo.jpg'];
+  var FALLBACK_PHOTOS = PHOTOS.slice();
+  var REPO = 'keromodyw/Thanks-A5-Ramez';
+
+  function scanPhotos() {
+    return fetch('https://api.github.com/repos/' + REPO + '/contents/photo', { cache: 'no-store' })
+      .then(function (r) { return r.json(); })
+      .then(function (items) {
+        if (!Array.isArray(items)) throw new Error('bad');
+        var exts = ['.jpg', '.jpeg', '.png', '.webp', '.gif'];
+        var names = [];
+        for (var i = 0; i < items.length; i++) {
+          var n = items[i].name || '';
+          var t = n.toLowerCase();
+          if (t === 'signature.png') continue;
+          var match = false;
+          for (var e = 0; e < exts.length; e++) {
+            if (t.indexOf(exts[e]) > -1) { match = true; break; }
+          }
+          if (match) names.push(n);
+        }
+        if (!names.length) throw new Error('empty');
+        names.sort();
+        var base = 'https://raw.githubusercontent.com/' + REPO + '/main/photo/';
+        return names.map(function (n) { return base + encodeURIComponent(n); });
+      })
+      .catch(function () {
+        return FALLBACK_PHOTOS.slice();
+      });
+  }
 
   var reduced = false;
   try {
@@ -172,8 +201,12 @@
     go(cur + 1, true);
   });
 
-  buildCarousel();
-  if (many) startAuto();
+  scanPhotos().then(function (list) {
+    PHOTOS = list;
+    many = PHOTOS.length > 1;
+    buildCarousel();
+    if (many) startAuto();
+  });
 
   var audioDuration = 0;
 
