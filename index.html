@@ -19,6 +19,7 @@
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  [hidden] { display: none !important; }
 
   body {
     min-height: 100dvh;
@@ -37,6 +38,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     padding: 34px 20px 44px;
   }
 
@@ -196,23 +198,27 @@
     border-radius: 18px;
     padding: 26px 22px 30px;
     box-shadow: 0 22px 55px rgba(96, 66, 40, .22);
-    margin: auto;
-    opacity: 0;
-    transform: translateY(120px) scale(.92);
-    transition: opacity .65s ease, transform .85s cubic-bezier(.22, 1.1, .35, 1);
+    display: none;
   }
-  .letter-card.show { opacity: 1; transform: translateY(0) scale(1); }
+  .stage.hidden .letter-card { display: block; animation: cardIn .85s cubic-bezier(.22, 1.1, .35, 1) both; }
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(120px) scale(.92); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
 
-  .letter-card > * { opacity: 0; transform: translateY(16px); }
-  .letter-card.show > * {
-    opacity: 1;
-    transform: translateY(0);
-    transition: opacity .6s ease, transform .65s cubic-bezier(.3, 1.3, .42, 1);
+  .letter-card > * { animation: riseFade .65s cubic-bezier(.3, 1.3, .42, 1) both; }
+  .letter-card .photo-frame { animation: photoRise .65s cubic-bezier(.3, 1.3, .42, 1) both; }
+  .letter-card .letter-text { animation-delay: .26s; }
+  .letter-card .signature { animation-delay: .38s; }
+  .letter-card .audio-card { animation-delay: .5s; }
+  @keyframes riseFade {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
   }
-  .letter-card.show .photo-frame { transition-delay: .12s; }
-  .letter-card.show .letter-text { transition-delay: .28s; }
-  .letter-card.show .signature { transition-delay: .42s; }
-  .letter-card.show .audio-card { transition-delay: .54s; }
+  @keyframes photoRise {
+    from { opacity: 0; transform: translateY(16px) rotate(-1.6deg); }
+    to { opacity: 1; transform: translateY(0) rotate(-1.6deg); }
+  }
 
   .photo-frame {
     width: 58%;
@@ -227,8 +233,18 @@
     outline: 1px solid rgba(150, 110, 70, .28);
     transform: rotate(-1.6deg);
     background: linear-gradient(135deg, #ead6b4, #dcc194);
+    cursor: pointer;
+    touch-action: manipulation;
   }
-  .photo-frame img {
+  .carousel { position: absolute; inset: 0; }
+  .slide {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity .55s ease;
+  }
+  .slide.on { opacity: 1; }
+  .slide img {
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -247,6 +263,53 @@
     color: #a97f58;
   }
 
+  .dots {
+    position: absolute;
+    left: 0; right: 0;
+    bottom: 8px;
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    z-index: 3;
+    padding: 2px;
+  }
+  .dots button {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    border: none;
+    padding: 0;
+    background: rgba(255, 255, 255, .55);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .25);
+    cursor: pointer;
+    transition: background .3s ease, transform .3s ease;
+  }
+  .dots button.on { background: #fff; transform: scale(1.35); }
+
+  .ph-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 3;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, .8);
+    color: var(--ink);
+    font-size: 1.1rem;
+    line-height: 1;
+    cursor: pointer;
+    box-shadow: 0 3px 8px rgba(60, 40, 20, .3);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    touch-action: manipulation;
+  }
+  .ph-nav.show { display: flex; }
+  .ph-nav.prev { inset-inline-start: 6px; }
+  .ph-nav.next { inset-inline-end: 6px; }
+
   .letter-text {
     font-size: clamp(.98rem, 4.2vw, 1.12rem);
     line-height: 2.1;
@@ -256,10 +319,12 @@
   }
 
   .signature {
-    margin-top: 16px;
-    font-size: 1rem;
-    font-weight: 800;
-    color: var(--coffee);
+    display: block;
+    margin: 18px auto 0;
+    max-width: 190px;
+    max-height: 76px;
+    width: auto;
+    height: auto;
   }
 
   .audio-card {
@@ -267,67 +332,140 @@
     background: linear-gradient(180deg, #fffdf7, #f6eddc);
     border: 1px solid rgba(150, 110, 70, .22);
     border-radius: 16px;
-    padding: 16px 16px 14px;
+    padding: 14px 16px;
   }
-  .audio-card .audio-label {
-    font-size: .92rem;
-    color: var(--ink-soft);
-    margin-bottom: 12px;
+  .voice-row {
+    display: flex;
+    align-items: center;
+    gap: 13px;
   }
-  .play-btn {
-    display: inline-flex;
+  .voice-btn {
+    flex: 0 0 auto;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    border: none;
+    background: linear-gradient(135deg, var(--coffee-2), var(--coffee));
+    color: #fdf6e9;
+    cursor: pointer;
+    display: flex;
     align-items: center;
     justify-content: center;
-    gap: 12px;
-    border: none;
-    border-radius: 44px;
-    padding: 14px 16px;
-    font-size: 1.02rem;
-    font-weight: 800;
-    color: #fdf6e9;
-    font-family: inherit;
-    background: linear-gradient(135deg, var(--coffee-2), var(--coffee));
-    cursor: pointer;
-    box-shadow: 0 10px 24px rgba(90, 62, 35, .32);
+    box-shadow: 0 8px 18px rgba(90, 62, 35, .32);
     transition: transform .2s ease, box-shadow .25s ease, filter .2s ease;
     touch-action: manipulation;
-    width: 100%;
   }
-  .play-btn:hover { transform: translateY(-3px); box-shadow: 0 14px 28px rgba(90,62,35,.4); filter: brightness(1.07); }
-  .play-btn:active { transform: translateY(0) scale(.97); }
-
-  .eq {
-    display: inline-flex;
+  .voice-btn:hover { transform: translateY(-2px); box-shadow: 0 11px 22px rgba(90,62,35,.4); filter: brightness(1.07); }
+  .voice-btn:active { transform: scale(.95); }
+  .voice-btn svg {
+    width: 22px;
+    height: 22px;
+    fill: currentColor;
+    display: block;
+  }
+  .voice-info {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .voice-eq {
+    display: flex;
     align-items: flex-end;
     gap: 3px;
-    height: 20px;
-    flex: 0 0 auto;
+    height: 16px;
   }
-  .eq span {
-    width: 4px;
+  .voice-eq span {
+    width: 3px;
     border-radius: 3px;
-    background: currentColor;
+    background: var(--coffee);
     height: 100%;
     transform-origin: bottom;
+    opacity: .25;
   }
-  .eq.playing span { animation: eqBar .9s ease-in-out infinite; }
-  .eq.playing span:nth-child(1) { animation-delay: 0s; }
-  .eq.playing span:nth-child(2) { animation-delay: .18s; }
-  .eq.playing span:nth-child(3) { animation-delay: .36s; }
-  .eq.playing span:nth-child(4) { animation-delay: .54s; }
+  .js-playing .voice-eq span { opacity: 1; animation: eqBar .9s ease-in-out infinite; }
+  .js-playing .voice-eq span:nth-child(1) { animation-delay: 0s; }
+  .js-playing .voice-eq span:nth-child(2) { animation-delay: .18s; }
+  .js-playing .voice-eq span:nth-child(3) { animation-delay: .36s; }
+  .js-playing .voice-eq span:nth-child(4) { animation-delay: .54s; }
   @keyframes eqBar {
     0%, 100% { transform: scaleY(.3); }
     50% { transform: scaleY(1); }
   }
+  .voice-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 5px;
+    font-size: .95rem;
+    min-height: 1.2em;
+  }
+  .voice-status { color: var(--ink-soft); font-weight: 600; }
+  .js-playing .voice-status { display: none; }
+  .voice-time {
+    font-weight: 700;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+  }
 
   .audio-note {
-    margin-top: 12px;
+    margin-top: 10px;
     font-size: .82rem;
     color: var(--ink-soft);
     display: none;
   }
 
+  .modal {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    background: rgba(24, 16, 10, .85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .25s ease;
+  }
+  .modal.open { opacity: 1; pointer-events: auto; }
+  .modal img {
+    max-width: 92vw;
+    max-height: 82vh;
+    border-radius: 10px;
+    box-shadow: 0 18px 60px rgba(0, 0, 0, .5);
+    object-fit: contain;
+  }
+  .modal button {
+    position: absolute;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, .16);
+    color: #fff;
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .2s ease;
+    touch-action: manipulation;
+  }
+  .modal button:hover { background: rgba(255, 255, 255, .3); }
+  .modal-close {
+    top: 18px;
+    inset-inline-end: 18px;
+  }
+  .modal-nav.prev { top: 50%; transform: translateY(-50%); inset-inline-start: 12px; font-size: 2rem; }
+  .modal-nav.next { top: 50%; transform: translateY(-50%); inset-inline-end: 60px; font-size: 2rem; }
+  .modal-nav.hide { display: none; }
+
   audio { display: none; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .letter-card,
+    .letter-card > * { animation-duration: .01s !important; animation-delay: 0s !important; transition: none !important; transform: none !important; }
+    .env-cover { transition: none !important; transform: none !important; }
+  }
 </style>
 </head>
 <body>
@@ -347,21 +485,40 @@
 
     <div class="letter-card" id="card">
       <div class="photo-frame" id="photoFrame">
-        <img id="photo" src="photo/photo.jpg" alt="صورة" onerror="swapPhoto()" />
+        <div class="carousel" id="carousel"></div>
+        <div class="dots" id="dots"></div>
+        <button class="ph-nav prev" id="prevPhoto" aria-label="السابق">›</button>
+        <button class="ph-nav next" id="nextPhoto" aria-label="التالي">‹</button>
       </div>
       <p class="letter-text" id="letterText">حط كلامك هنا...
 اكتب رسالتك زي ما تحب، والصورة والفويس نوت هيظهروا هنا.</p>
-      <p class="signature" id="signature">من: إسمك ❤</p>
+      <img class="signature" id="signature" src="photo/signature.png" alt="التوقيع" />
       <div class="audio-card">
-        <p class="audio-label">بصيتك وصلت، استمع:</p>
-        <button class="play-btn" id="playBtn">
-          <span class="eq" id="eq"><span></span><span></span><span></span><span></span></span>
-          <span id="playLabel">استمع للفويس نوت</span>
-        </button>
+        <div class="voice-row">
+          <button class="voice-btn" id="playBtn" aria-label="تشغيل الفويس">
+            <svg id="icoPlay" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+            <svg id="icoPause" viewBox="0 0 24 24" aria-hidden="true" hidden><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+            <svg id="icoReplay" viewBox="0 0 24 24" aria-hidden="true" hidden><path d="M12 5V2L6.5 7.5 12 13V9.9c3.2 0 5.8 2.6 5.8 5.8s-2.6 5.8-5.8 5.8-5.8-2.6-5.8-5.8H4A8 8 0 1 0 12 5z"/></svg>
+          </button>
+          <div class="voice-info">
+            <div class="voice-eq" id="eq"><span></span><span></span><span></span><span></span></div>
+            <div class="voice-meta">
+              <span class="voice-status" id="voiceStatus">تشغيل</span>
+              <span class="voice-time" id="voiceTime">0:00</span>
+            </div>
+          </div>
+        </div>
         <audio id="voice" src="audio/voice-note.mp3" preload="auto"></audio>
-        <div class="audio-note" id="audioNote">مش لاقي ملف الصوت — حط الفويس نوت في مجلد audio باسم voice-note.mp3</div>
+        <div class="audio-note" id="audioNote">مش لاقي ملف الصوت — اتأكد إن الفويس نوت في مجلد audio</div>
       </div>
     </div>
+  </div>
+
+  <div class="modal" id="photoModal" role="dialog" aria-modal="true">
+    <button class="modal-close" id="modalClose" aria-label="إغلاق">×</button>
+    <button class="modal-nav prev hide" id="modalPrev" aria-label="السابق">›</button>
+    <img id="modalImg" alt="صورة" />
+    <button class="modal-nav next hide" id="modalNext" aria-label="التالي">‹</button>
   </div>
 
 <script src="app.js"></script>
